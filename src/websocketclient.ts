@@ -1,48 +1,80 @@
 import WebSocket = require('ws');
-import {AudioDevice} from './audiodevice';
+import {AudioDevice, printAudioInputDevices} from './audiodevice';
 import {BaseMessage, baseMessageFromString} from './baseMessage';
 import {InitStreamMessage, InitStreamFromString} from './streammessage'
-export class WebsocketClient{
+import * as socketio from 'socket.io';
+import * as ss from 'socket.io-stream';
 
-    private socket: WebSocket;
+export class SocketIOClient{
+
+    private socket: socketio.Socket;
     private closeCallback: () => void;
     private audioDeviceStream: AudioDevice;
-    private streams: object;
+    private deviceListSendInterval: NodeJS.Timeout;
+    private audioDeviceNames: string[]
 
-    constructor(clientConnection: WebSocket, closeCallback: () => void){
-        this.streams = {};
+    constructor(clientConnection: socketio.Socket, closeCallback: () => void){
         this.socket = clientConnection;
         this.closeCallback = closeCallback;
-
         this.addEventListeners();
+        this.startDeviceListInterval();
+        console.log("Client with socket id", this.socket.id, "has connected");
+    }
+
+    private startDeviceListInterval(){
+        //get devices from system
+        const audioDevices = printAudioInputDevices();
+        let audioNames = []
+        audioDevices.forEach(element => {
+            audioNames.push(element['name']);
+        });
+        console.log(audioNames);
+        this.audioDeviceNames = audioNames;
+
+        this.deviceListSendInterval = setInterval(() => {
+            //send list to client
+            console.log("Sending device name list to client");
+            this.socket.emit('device_list', audioNames);
+        }, 5000);
     }
 
     private addEventListeners(){
-        this.socket.on('message', (data: string) => this.onData(data));
+        this.socket.on('start_stream', (deviceName: string) => this.onStart(deviceName));
+        this.socket.on('stop_stream', () => this.onCloseStream());
         this.socket.on('close', () => this.onClose());
+        this.socket.on('disconnect', () => this.onClose())
         this.socket.on('error', (err) => console.log(err));
     }
 
-    private async onData(data: string){
-        const message = InitStreamFromString(data);
-        console.log(message.command);
-        if(message.command == "INIT_STREAM"){
-            const initMessage = InitStreamFromString(data);
-            //this.audioDeviceStream = 
-            this.streams[initMessage.deviceName] = new AudioDevice(initMessage.deviceName,
-                (audioData) => {this.sendAudio(audioData)});
-            this.streams[initMessage.deviceName].start();
+    private async onStart(deviceName){
+        if(this.audioDeviceStream){
+            this.audioDeviceStream.stop();
         }
+        this.audioDeviceStream = new AudioDevice(deviceName);/*, 
+            (audioData) => {this.sendAudio(audioData)});*/
+        this.audioDeviceStream.start();
+        this.socket.emit('message_status', "Successfully started audio stream");
+    }
 
-        console.log(data);
+    private async onCloseStream(){
+        if(this.audioDeviceStream){
+            this.audioDeviceStream.stop();
+            this.socket.emit('message_status', "The stream was stopped");
+        }
+        else{
+            this.socket.emit('message_warning', "The stream was already closed");
+        }
     }
 
     private onClose(){
         this.closeCallback();
+        clearTimeout(this.deviceListSendInterval);
+        console.log("Client with socket ID", this.socket.id, "has disconnected");
     }
 
     private sendAudio(audioData: Buffer){
         //console.log(this.socket);
-        this.socket.send(audioData);
+        console.log(audioData);
+        this.socket.emit('audio', audioData);
     }
 }

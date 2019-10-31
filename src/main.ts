@@ -3,6 +3,7 @@ import {FileWriter} from 'wav';
 import {WebsocketServer} from './websocketserver';
 
 const websocketserver = new WebsocketServer(6879);
+console.log("listening on 6879");
 /*
 let input_devices = printAudioInputDevices();
 

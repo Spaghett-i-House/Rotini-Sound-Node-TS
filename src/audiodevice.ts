@@ -9,7 +9,7 @@ export class AudioDevice{
         this.onAudioCallback = audio_data_callback;
         this.portAudioDevice = new portAudio.AudioIO({
             inOptions: {
-                channelCount: 2,
+                channelCount: 1,
                 sampleFormat: portAudio.SampleFormat16Bit,
                 sampleRate: 44100,
                 //deviceId: -1
@@ -26,8 +26,7 @@ export class AudioDevice{
         this.portAudioDevice.on('error', (err) => {
             console.log(err);
             this.portAudioDevice.quit();
-        })
-
+        });
     }
 
     private onData(audioData: Buffer){
@@ -35,12 +34,13 @@ export class AudioDevice{
         this.onAudioCallback(audioData);
     }
 
-    public start(){
+    /*public start(stream: NodeJS.WritableStream){
         this.portAudioDevice.start();
-    }
+        this.portAudioDevice.pipe(stream);
+    }*/
 
     public stop(){
-        this.portAudioDevice.stop();
+        this.portAudioDevice.quit();
     }
 }
 
