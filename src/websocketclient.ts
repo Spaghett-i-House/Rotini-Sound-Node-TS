@@ -2,6 +2,7 @@ import WebSocket = require('ws');
 import {AudioDevice, printAudioInputDevices} from './audiodevice';
 import {BaseMessage, baseMessageFromString} from './baseMessage';
 import {InitStreamMessage, InitStreamFromString} from './streammessage'
+import { AudioAnalyser, AudioType } from './audioanalyser';
 import * as socketio from 'socket.io';
 
 export class SocketIOClient{
@@ -50,7 +51,7 @@ export class SocketIOClient{
             this.audioDeviceStream.stop();
         }
         this.audioDeviceStream = new AudioDevice(deviceName, 
-            (audioData) => {this.sendAudio(audioData)});
+            (audioData) => {this.sendAudioFFT(audioData)});
         this.audioDeviceStream.start();
         this.socket.emit('message_status', "Successfully started audio stream");
     }
@@ -78,6 +79,11 @@ export class SocketIOClient{
     }
 
     private sendAudioFFT(audioData: Buffer){
-        
+        // take fft
+        let asF32data = AudioAnalyser.toFloat32Array(audioData, AudioType.INT16);
+        let frequencyData = AudioAnalyser.getFrequencies(asF32data, 44100);
+        console.log(frequencyData);
+        // send fft data
+        this.socket.emit('audio', audioData, frequencyData);
     }
 }
