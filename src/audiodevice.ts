@@ -34,10 +34,9 @@ export class AudioDevice{
         this.onAudioCallback(audioData);
     }
 
-    /*public start(stream: NodeJS.WritableStream){
+    public start(){
         this.portAudioDevice.start();
-        this.portAudioDevice.pipe(stream);
-    }*/
+    }
 
     public stop(){
         this.portAudioDevice.quit();

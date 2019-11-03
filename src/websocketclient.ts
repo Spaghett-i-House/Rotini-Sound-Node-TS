@@ -3,7 +3,6 @@ import {AudioDevice, printAudioInputDevices} from './audiodevice';
 import {BaseMessage, baseMessageFromString} from './baseMessage';
 import {InitStreamMessage, InitStreamFromString} from './streammessage'
 import * as socketio from 'socket.io';
-import * as ss from 'socket.io-stream';
 
 export class SocketIOClient{
 
@@ -30,10 +29,10 @@ export class SocketIOClient{
         });
         console.log(audioNames);
         this.audioDeviceNames = audioNames;
-
+        this.socket.emit('device_list', audioNames);
         this.deviceListSendInterval = setInterval(() => {
             //send list to client
-            console.log("Sending device name list to client");
+            //console.log("Sending device name list to client");
             this.socket.emit('device_list', audioNames);
         }, 5000);
     }
@@ -50,8 +49,8 @@ export class SocketIOClient{
         if(this.audioDeviceStream){
             this.audioDeviceStream.stop();
         }
-        this.audioDeviceStream = new AudioDevice(deviceName);/*, 
-            (audioData) => {this.sendAudio(audioData)});*/
+        this.audioDeviceStream = new AudioDevice(deviceName, 
+            (audioData) => {this.sendAudio(audioData)});
         this.audioDeviceStream.start();
         this.socket.emit('message_status', "Successfully started audio stream");
     }
@@ -74,7 +73,11 @@ export class SocketIOClient{
 
     private sendAudio(audioData: Buffer){
         //console.log(this.socket);
-        console.log(audioData);
+        //console.log(audioData);
         this.socket.emit('audio', audioData);
+    }
+
+    private sendAudioFFT(audioData: Buffer){
+        
     }
 }
