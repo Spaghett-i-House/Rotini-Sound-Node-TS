@@ -13,7 +13,7 @@ export class AudioAnalyser{
         let magnatudes = fftUtil.fftMag(phasors);
 
         let both = frequencies.map((f, ix) => {
-            return {frequecy: f, magnitude: magnatudes[ix]}
+            return {frequecy: Math.floor(f), magnitude: magnatudes[ix]}
         });
 
         console.log(typeof(both), both);

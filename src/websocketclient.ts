@@ -80,10 +80,15 @@ export class SocketIOClient{
 
     private sendAudioFFT(audioData: Buffer){
         // take fft
-        let asF32data = AudioAnalyser.toFloat32Array(audioData, AudioType.INT16);
-        let frequencyData = AudioAnalyser.getFrequencies(asF32data, 44100);
-        console.log(frequencyData);
+        try{
+            let asF32data = AudioAnalyser.toFloat32Array(audioData, AudioType.INT16);
+            let frequencyData = AudioAnalyser.getFrequencies(asF32data, 44100);
+            this.socket.emit('audio', frequencyData);
+        } catch(err){
+            console.log("[WARNING] Could not perform FFT Data length not sufficient");
+        }
+        //console.log(frequencyData);
         // send fft data
-        this.socket.emit('audio', audioData, frequencyData);
+        
     }
 }
