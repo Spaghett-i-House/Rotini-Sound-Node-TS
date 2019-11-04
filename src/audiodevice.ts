@@ -39,6 +39,7 @@ export class AudioDevice{
     }
 
     public stop(){
+        console.log("Stopping");
         this.portAudioDevice.quit();
     }
 }

@@ -15,6 +15,7 @@ export class SocketIOClient{
 
     constructor(clientConnection: socketio.Socket, closeCallback: () => void){
         this.socket = clientConnection;
+        this.socket.emit('ping');
         this.closeCallback = closeCallback;
         this.addEventListeners();
         this.startDeviceListInterval();
@@ -68,6 +69,12 @@ export class SocketIOClient{
 
     private onClose(){
         this.closeCallback();
+        try{
+            this.audioDeviceStream.stop();
+        } catch(err){
+            console.log(err);
+        }
+
         clearTimeout(this.deviceListSendInterval);
         console.log("Client with socket ID", this.socket.id, "has disconnected");
     }
