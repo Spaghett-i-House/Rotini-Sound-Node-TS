@@ -20,7 +20,13 @@ export class AudioAnalyser{
         return both;
     }
 
+    /**
+     * toFloat32Array: turns a buffer into an array of its given datatype
+     * @param audioData 
+     * @param fromType 
+     */
     public static toFloat32Array(audioData: Buffer, fromType: AudioType){
+        
         let arrayBuffer;
 
         if(fromType == AudioType.INT8){

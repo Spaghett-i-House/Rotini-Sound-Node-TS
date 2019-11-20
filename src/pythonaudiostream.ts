@@ -1,11 +1,10 @@
-import * as portAudio from 'naudiodon';
-
+import {spawn, ChildProcess} from 'child_process';
 /**
  * AudioDevice: a class used to access system audio
  */
-export class AudioDevice{
+export class PythonAudioDevice{
 
-    private portAudioDevice: portAudio.AudioInput;
+    private pythonSubprocess: ChildProcess;
     private onAudioCallback: (audioData: Buffer) => void;
 
     /**
@@ -15,7 +14,7 @@ export class AudioDevice{
      */
     constructor(device_name: string, audio_data_callback: (audioData: Buffer) => void){
         this.onAudioCallback = audio_data_callback;
-        this.portAudioDevice = new portAudio.AudioIO({
+        /*this.portAudioDevice = new portAudio.AudioIO({
             inOptions: {
                 channelCount: 1,
                 sampleFormat: portAudio.SampleFormat16Bit,
@@ -24,19 +23,25 @@ export class AudioDevice{
                 deviceName: device_name
             }
         });
-        this.addEventListeners();
+        this.addEventListeners();*/
+        this.pythonSubprocess = spawn('python3', ['./python/audiopipe.py', device_name]);
+        this.addEventListeners()
+        /*this.pythonSubprocess.stdout.on('data', (data) => {
+            console.log(data);
+        });*/
+        
     }
 
     /**
      * addEventListeners: connects the given audio devices to its asynchronous event streams
      */
     private addEventListeners(){
-        this.portAudioDevice.on('data', (audioData: Buffer) => this.onData(audioData));
-        this.portAudioDevice.on('close', () => console.log("audio device has closed"));
-        this.portAudioDevice.on('end', () => console.log("audio device has ended"));
-        this.portAudioDevice.on('error', (err) => {
-            console.log(err);
-            this.portAudioDevice.quit();
+        this.pythonSubprocess.stderr.on('data', (data) => {
+            console.log("ERROR");
+            console.log(data.toString());
+        });
+        this.pythonSubprocess.on('close', (code) => {
+            console.log(`Child process exited with code ${code}`);
         });
     }
 
@@ -53,7 +58,9 @@ export class AudioDevice{
      * starts the streaming of the portaudio device
      */
     public start(){
-        this.portAudioDevice.start();
+        this.pythonSubprocess.stdout.on('data', (data) => {
+            this.onData(data);
+        });
     }
 
     /**
@@ -61,18 +68,18 @@ export class AudioDevice{
      * BUG: this.portaudio.quit seems to not actually stop os level device
      */
     public stop(){
-        console.log("Stopping");
-        this.portAudioDevice.quit();
+        this.pythonSubprocess.kill();
+        console.log("Process killed");
     }
 }
 
-export function printAudioInputDevices(): object[]{
-    const devices = portAudio.getDevices();
-    let inputdevices = [];
-    devices.forEach(element => {
-        if (element.maxInputChannels > 0){
-            inputdevices.push(element);
-        }
-    });
-    return inputdevices;
-}
+let testpy = new PythonAudioDevice('default', (data) => {
+    console.log(data);
+    let newArr  = new Float32Array(data.length/4);
+    for(let i=0; i<data.length/4; i++){
+        newArr[i] = data.readFloatBE(i*4);
+    }
+    console.log(newArr);
+});
+
+testpy.start();

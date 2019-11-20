@@ -5,6 +5,12 @@ export class InitStreamMessage extends BaseMessage{
     public sampleRate: number;
     public channels: number;
 
+    /**
+     * constructor
+     * @param device_name 
+     * @param samplerate 
+     * @param channels 
+     */
     constructor(device_name: string, samplerate: number, channels: number){
         super("INIT_STREAM", [], {});
         this.deviceName = device_name;
