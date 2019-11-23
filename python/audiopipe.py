@@ -21,7 +21,7 @@ device = sys.argv[1]
 chunksize = int(sys.argv[2])
 channels = int(sys.argv[3])
 #fileo.write(str(chunksize))
-device_names = []
+
 default_device = None
 for i in sd.query_devices():
     fileo.write(i['name'])
@@ -32,21 +32,24 @@ for i in sd.query_devices():
 if device not in sd.query_devices():
     if(default_device):
         device = default_device
-    else:
-        device = device_names[0]
 
 try:
-    with sd.InputStream(samplerate=44100,
-                        channels=channels,
-                        callback=callback,
-                        device=device,
-                        blocksize=chunksize) as stream:
-        #print(sd.query_devices()[stream.device]['name'])
-        while True:
+    if device not in sd.query_devices():
+        with sd.InputStream(samplerate=44100,
+                            channels=channels,
+                            callback=callback,
+                            device=device,
+                            blocksize=chunksize) as stream:
+            while True:
+                sys.stdout.buffer.write(sound_queue.get().tobytes())
+    else:
+        with sd.InputStream(samplerate=44100,
+                            channels=channels,
+                            callback=callback,
+                            blocksize=chunksize) as stream:
+            while True:
+                sys.stdout.buffer.write(sound_queue.get().tobytes())
 
-            sys.stdout.buffer.write(sound_queue.get().tobytes())
-            #print(sound_queue.get().tobytes())
-            #sound_queue.get()
 except KeyboardInterrupt:
     fileo.close()
     exit(2)
