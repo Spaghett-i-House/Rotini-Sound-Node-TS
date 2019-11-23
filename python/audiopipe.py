@@ -22,16 +22,8 @@ chunksize = int(sys.argv[2])
 channels = int(sys.argv[3])
 #fileo.write(str(chunksize))
 
-default_device = None
 for i in sd.query_devices():
     fileo.write(i['name'])
-    device_names.append(i['name'])
-    if "default" in i['name']:
-        default_device = i['name']
-
-if device not in sd.query_devices():
-    if(default_device):
-        device = default_device
 
 try:
     if device not in sd.query_devices():
