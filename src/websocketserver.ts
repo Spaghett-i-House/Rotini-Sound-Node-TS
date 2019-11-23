@@ -1,16 +1,20 @@
-import * as express from 'express';
-import * as http from 'http';
 import {SocketIOClient} from "./websocketclient";
 import {v1 as uuid} from 'uuid';
-import WebSocket = require('ws');
 import * as socketio from 'socket.io';
-import { Server } from 'tls';
 
+/**
+ * WebsocketServer: a server using socketIO to handle new websocket connections
+ * from the web client
+ */
 export class WebsocketServer{
 
     private socketIOServer: socketio.Server;
     private connectedClients: object;
 
+    /**
+     * constructor: create and start the socketIO server
+     * @param port: the port to listen on
+     */
     constructor(port: number){
         this.connectedClients = {};
         this.socketIOServer = require('socket.io')(port, {
@@ -21,11 +25,17 @@ export class WebsocketServer{
         this.addEventListeners();
     }
 
+    /**
+     * addEventListeners: currently server only handles connections so a connection
+     * listener must be added
+     */
     private addEventListeners(){
         this.socketIOServer.on('connection', (new_socket) => this.onConnection(new_socket));
-        //this.socketIOServer.on('error', (err) => console.log(err));
     }
-
+    /**
+     * onConnection: Handles a new socketIO client connection
+     * @param websocket : the socket that has just connected
+     */
     private onConnection(websocket: socketio.Socket){
         console.log("Received new websocket connection");
         const id = uuid().toString();

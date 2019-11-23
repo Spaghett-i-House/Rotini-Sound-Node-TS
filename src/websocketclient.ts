@@ -6,6 +6,9 @@ import { AudioType, AudioEventType } from "./types/audio";
 import { AudioAnalyser } from "./audioanalyser"; //, AudioType } from './audioanalyser';
 import * as socketio from 'socket.io';
 
+/**
+ * SocketIOClient: represents a client connection to the socketIO server
+ */
 export class SocketIOClient{
 
     private socket: socketio.Socket;
@@ -14,8 +17,14 @@ export class SocketIOClient{
     private deviceListSendInterval: NodeJS.Timeout;
     private audioDeviceNames: string[]
 
+    /**
+     * constructor
+     * @param clientConnection: the socketIO socket connection representing the client
+     * @param closeCallback: a callback function to be run on the client closing
+     */
     constructor(clientConnection: socketio.Socket, closeCallback: () => void){
         this.socket = clientConnection;
+        this.audioDeviceNames = [];
         this.socket.emit('ping');
         this.closeCallback = closeCallback;
         this.addEventListeners();
@@ -23,24 +32,24 @@ export class SocketIOClient{
         console.log("Client with socket id", this.socket.id, "has connected");
     }
 
+    /**
+     * startDeviceListInterval: every 5 seconds a device list message will be send to the
+     * client with a refreshed device list
+     */
     private startDeviceListInterval(){
-        //get devices from system
-        /*const audioDevices = printAudioInputDevices();
-        let audioNames = []
-        audioDevices.forEach(element => {
-            audioNames.push(element['name']);
-        });*/
         let audioNames = ["device1", "device2"];
         console.log(audioNames);
         this.audioDeviceNames = audioNames;
         this.socket.emit('device_list', audioNames);
         this.deviceListSendInterval = setInterval(() => {
             //send list to client
-            //console.log("Sending device name list to client");
             this.socket.emit('device_list', audioNames);
         }, 5000);
     }
 
+    /**
+     * addEventListeners: handles all events regarding the socketIO client connection
+     */
     private addEventListeners(){
         this.socket.on('start_stream', (deviceName: string) => this.onStart(deviceName));
         this.socket.on('stop_stream', () => this.onCloseStream());
@@ -49,18 +58,24 @@ export class SocketIOClient{
         this.socket.on('error', (err) => console.log(err));
     }
 
-    private async onStart(deviceindex){
+    /**
+     * onStart: Handles what to do on the reception of a start message
+     * @param devicename: the name of the device to get audio from
+     */
+    private async onStart(devicename: string){
         if(this.audioDeviceStream){
             this.audioDeviceStream.stop();
         }
-        this.audioDeviceStream = new PythonAudioDevice(deviceindex, 1024, 1, AudioType.Float32);
-            //(audioData) => {this.sendAudioFFT(audioData)});
+        this.audioDeviceStream = new PythonAudioDevice(devicename, 1024, 1, AudioType.Float32);
         this.audioDeviceStream.subscribe(AudioEventType.ONAUDIODATA, (data: Float32Array) => this.sendAudioFFT(data));
         this.audioDeviceStream.subscribe(AudioEventType.ERROR, (error) => {console.log("PyError")});
         this.audioDeviceStream.start();
         this.socket.emit('message_status', "Successfully started audio stream");
     }
-
+    
+    /**
+     * onCloseStream: handles the reception of a close audio message
+     */
     private async onCloseStream(){
         if(this.audioDeviceStream){
             this.audioDeviceStream.stop();
@@ -71,6 +86,10 @@ export class SocketIOClient{
         }
     }
 
+    /**
+     * onClose: handles the reception or detection of a client close message
+     * closes out this client
+     */
     private onClose(){
         this.closeCallback();
         try{
@@ -83,23 +102,28 @@ export class SocketIOClient{
         console.log("Client with socket ID", this.socket.id, "has disconnected");
     }
 
+    /**
+     * DEPRICIATED: sendAudio: handles the sending of raw audio bytes
+     * @param audioData the raw audio bytes to send to the client
+     */
     private sendAudio(audioData: Buffer){
         //console.log(this.socket);
         //console.log(audioData);
         this.socket.emit('audio', audioData);
     }
 
+    /**
+     * sendAudioFFT: handles the sending of an FFT from given audio bytes to the client
+     * @param audioData a float32 array of audio samples to take the fft of
+     */
     private sendAudioFFT(audioData: Float32Array){
         // take fft
         try{
-            //let asF32data = AudioAnalyser.toFloat32Array(audioData, AudioType.Float32);
             let frequencyData = AudioAnalyser.getFrequencies(audioData, 44100);
             this.socket.emit('audio', frequencyData);
         } catch(err){
-            //console.error(err);
             console.log("[WARNING] Could not perform FFT Data length not sufficient");
         }
-        //console.log(frequencyData);
         // send fft data
         
     }

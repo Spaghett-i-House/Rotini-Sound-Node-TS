@@ -3,8 +3,14 @@ export interface Subject{
     unsubscribe(observer: Observer): void;
 }
 
+/**
+ * represents a callback that will be dispatched in EventDispatcher
+ */
 export type Handler<E> = (event: E) => void;
 
+/**
+ * EventDispatcher: handles the dispatching of events to observer
+ */
 export class EventDispatcher<T> {
     private handlers: Handler<T>[] = [];
     fire(event: T){
