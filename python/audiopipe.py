@@ -21,10 +21,14 @@ device = sys.argv[1]
 chunksize = int(sys.argv[2])
 channels = int(sys.argv[3])
 #fileo.write(str(chunksize))
+device_names = []
+for i in sd.query_devices():
+    fileo.write(i['name'])
+    device_names.append(i['name'])
+    
 if device not in sd.query_devices():
-    device = 'default'
-#for i in sd.query_devices():
-    #print(i['name'])
+    device = device_names[0]
+
 try:
     with sd.InputStream(samplerate=44100,
                         channels=channels,
