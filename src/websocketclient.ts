@@ -68,7 +68,7 @@ export class SocketIOClient{
         }
         this.audioDeviceStream = new PythonAudioDevice(devicename, 1024, 1, AudioType.Float32);
         this.audioDeviceStream.subscribe(AudioEventType.ONAUDIODATA, (data: Float32Array) => this.sendAudioFFT(data));
-        this.audioDeviceStream.subscribe(AudioEventType.ERROR, (error) => {console.log("PyError")});
+        this.audioDeviceStream.subscribe(AudioEventType.ERROR, (error) => {console.log(error.message.toString())});
         this.audioDeviceStream.start();
         this.socket.emit('message_status', "Successfully started audio stream");
     }

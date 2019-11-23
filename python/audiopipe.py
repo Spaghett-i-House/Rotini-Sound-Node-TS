@@ -26,7 +26,7 @@ for i in sd.query_devices():
     fileo.write(i['name'])
 
 try:
-    if device not in sd.query_devices():
+    if device in sd.query_devices():
         with sd.InputStream(samplerate=44100,
                             channels=channels,
                             callback=callback,
