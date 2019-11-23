@@ -4,32 +4,43 @@ import argparse
 from queue import Queue
 
 sound_queue = Queue()
+fileo = open("logo.txt", "w")
+fileo.write("Started\n")
 
 def callback(indata, frames, time, status):
-    if status:
-        print(status)
+    #if status:
+        #print(status)
+    #fileo.write(str(indata.dtype)+"\n")
+    #fileo.write(str(len(indata))+"\n")
+
     sound_queue.put(indata.copy())
 
 # get cmd line arguments
 #print(sd.query_devices())
 device = sys.argv[1]
-chunksize = int(sys.argv[2]) or 1024
-
-
-for i in sd.query_devices():
-    print(i['name'])
+chunksize = int(sys.argv[2])
+channels = int(sys.argv[3])
+#fileo.write(str(chunksize))
+if device not in sd.query_devices():
+    device = 'default'
+#for i in sd.query_devices():
+    #print(i['name'])
 try:
     with sd.InputStream(samplerate=44100,
-                        channels=1,
+                        channels=channels,
                         callback=callback,
                         device=device,
-                        blocksize=1024) as stream:
-        print(sd.query_devices()[stream.device]['name'])
+                        blocksize=chunksize) as stream:
+        #print(sd.query_devices()[stream.device]['name'])
         while True:
-            print(sound_queue.get().tobytes())
+
+            sys.stdout.buffer.write(sound_queue.get().tobytes())
+            #print(sound_queue.get().tobytes())
             #sound_queue.get()
 except KeyboardInterrupt:
-    exit()
+    fileo.close()
+    exit(2)
 except Exception as e:
-    print(e)
+    fileo.write(e)
+    fileo.close()
     exit()

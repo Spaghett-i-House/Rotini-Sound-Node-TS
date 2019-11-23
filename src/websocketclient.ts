@@ -1,9 +1,13 @@
 import WebSocket = require('ws');
-import {AudioDevice, printAudioInputDevices} from './audiodevice';
+//import {AudioDevice, printAudioInputDevices} from './audiodevice';
+import {PythonAudioDevice} from "./audio/pythonaudiodevice";
+import {AudioDevice} from "./audio/audiodevice";
+import { AudioType } from "./types/audio";
 import {BaseMessage, baseMessageFromString} from './baseMessage';
 import {InitStreamMessage, InitStreamFromString} from './streammessage'
-import { AudioAnalyser, AudioType } from './audioanalyser';
+import { AudioAnalyser } from "./audioanalyser"; //, AudioType } from './audioanalyser';
 import * as socketio from 'socket.io';
+import { AudioDataEvent } from './types/events';
 
 export class SocketIOClient{
 
@@ -24,11 +28,12 @@ export class SocketIOClient{
 
     private startDeviceListInterval(){
         //get devices from system
-        const audioDevices = printAudioInputDevices();
+        /*const audioDevices = printAudioInputDevices();
         let audioNames = []
         audioDevices.forEach(element => {
             audioNames.push(element['name']);
-        });
+        });*/
+        let audioNames = ["device1", "device2"];
         console.log(audioNames);
         this.audioDeviceNames = audioNames;
         this.socket.emit('device_list', audioNames);
@@ -47,12 +52,17 @@ export class SocketIOClient{
         this.socket.on('error', (err) => console.log(err));
     }
 
-    private async onStart(deviceName){
+    private async onStart(deviceindex){
         if(this.audioDeviceStream){
             this.audioDeviceStream.stop();
         }
-        this.audioDeviceStream = new AudioDevice(deviceName, 
-            (audioData) => {this.sendAudioFFT(audioData)});
+        this.audioDeviceStream = new PythonAudioDevice(deviceindex, 1024, 1, AudioType.Float32);
+            //(audioData) => {this.sendAudioFFT(audioData)});
+        this.audioDeviceStream.subscribe('data', (data: Float32Array) => {
+            this.sendAudioFFT(data);
+        });
+        this.audioDeviceStream.subscribe('error', (error) => {console.log("PyError")});
+
         this.audioDeviceStream.start();
         this.socket.emit('message_status', "Successfully started audio stream");
     }
@@ -85,13 +95,14 @@ export class SocketIOClient{
         this.socket.emit('audio', audioData);
     }
 
-    private sendAudioFFT(audioData: Buffer){
+    private sendAudioFFT(audioData: Float32Array){
         // take fft
         try{
-            let asF32data = AudioAnalyser.toFloat32Array(audioData, AudioType.INT16);
-            let frequencyData = AudioAnalyser.getFrequencies(asF32data, 44100);
+            //let asF32data = AudioAnalyser.toFloat32Array(audioData, AudioType.Float32);
+            let frequencyData = AudioAnalyser.getFrequencies(audioData, 44100);
             this.socket.emit('audio', frequencyData);
         } catch(err){
+            //console.error(err);
             console.log("[WARNING] Could not perform FFT Data length not sufficient");
         }
         //console.log(frequencyData);

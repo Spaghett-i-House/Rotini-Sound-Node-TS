@@ -1,6 +1,7 @@
 var fft = require('fft-js').fft;
 var fftUtil = require('fft-js').util;
-
+var ifft = require('fft-js').ifft;
+import { AudioType } from "./types/audio";
 
 export class AudioAnalyser{
     /**
@@ -8,9 +9,11 @@ export class AudioAnalyser{
      */
     
     public static getFrequencies(audioData: Float32Array, sampleRate: number){
+        //console.log(audioData.filter((value, index, array) => {}));
         let phasors = fft(audioData);
         let frequencies = fftUtil.fftFreq(phasors, sampleRate);
         let magnatudes = fftUtil.fftMag(phasors);
+        //console.log(`iftt ${ifft(phasors)}`);
 
         let both = frequencies.map((f, ix) => {
             return [Math.floor(f), magnatudes[ix]]
@@ -29,13 +32,13 @@ export class AudioAnalyser{
         
         let arrayBuffer;
 
-        if(fromType == AudioType.INT8){
+        if(fromType == AudioType.Int8){
             arrayBuffer = new Int8Array(audioData);
         }
-        else if(fromType == AudioType.INT16){
+        else if(fromType == AudioType.Int16){
             arrayBuffer = new Int16Array(audioData);
         }
-        else if (fromType == AudioType.INT32){
+        else if (fromType == AudioType.Int32){
             arrayBuffer = new Int32Array(audioData);
         }
 
@@ -48,8 +51,10 @@ export class AudioAnalyser{
     }
 }
 
-export enum AudioType{
+
+
+/*export enum AudioType{
     INT8 = 127,
     INT16 = 32767,
     INT32 = 2147483647
-}
+}*/
