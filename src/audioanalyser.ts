@@ -1,6 +1,5 @@
 var fft = require('fft-js').fft;
 var fftUtil = require('fft-js').util;
-var ifft = require('fft-js').ifft;
 import { AudioType } from "./types/audio";
 
 export class AudioAnalyser{
@@ -8,18 +7,20 @@ export class AudioAnalyser{
      * AudioAnalyser provides functions to analyse audio buffers with
      */
     
+    /**
+     * getFrequencies: returns the frequency bins related to samples
+     * @param audioData: the float32array of raw audio samples
+     * @param sampleRate: the samplerate that the raw audio samples were recorded with
+     */
     public static getFrequencies(audioData: Float32Array, sampleRate: number){
-        //console.log(audioData.filter((value, index, array) => {}));
         let phasors = fft(audioData);
         let frequencies = fftUtil.fftFreq(phasors, sampleRate);
         let magnatudes = fftUtil.fftMag(phasors);
-        //console.log(`iftt ${ifft(phasors)}`);
 
         let both = frequencies.map((f, ix) => {
             return [Math.floor(f), magnatudes[ix]]
         });
 
-        //console.log(typeof(both), both);
         return both;
     }
 

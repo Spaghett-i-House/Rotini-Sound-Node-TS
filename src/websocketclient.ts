@@ -2,12 +2,9 @@ import WebSocket = require('ws');
 //import {AudioDevice, printAudioInputDevices} from './audiodevice';
 import {PythonAudioDevice} from "./audio/pythonaudiodevice";
 import {AudioDevice} from "./audio/audiodevice";
-import { AudioType } from "./types/audio";
-import {BaseMessage, baseMessageFromString} from './baseMessage';
-import {InitStreamMessage, InitStreamFromString} from './streammessage'
+import { AudioType, AudioEventType } from "./types/audio";
 import { AudioAnalyser } from "./audioanalyser"; //, AudioType } from './audioanalyser';
 import * as socketio from 'socket.io';
-import { AudioDataEvent } from './types/events';
 
 export class SocketIOClient{
 
@@ -58,11 +55,8 @@ export class SocketIOClient{
         }
         this.audioDeviceStream = new PythonAudioDevice(deviceindex, 1024, 1, AudioType.Float32);
             //(audioData) => {this.sendAudioFFT(audioData)});
-        this.audioDeviceStream.subscribe('data', (data: Float32Array) => {
-            this.sendAudioFFT(data);
-        });
-        this.audioDeviceStream.subscribe('error', (error) => {console.log("PyError")});
-
+        this.audioDeviceStream.subscribe(AudioEventType.ONAUDIODATA, (data: Float32Array) => this.sendAudioFFT(data));
+        this.audioDeviceStream.subscribe(AudioEventType.ERROR, (error) => {console.log("PyError")});
         this.audioDeviceStream.start();
         this.socket.emit('message_status', "Successfully started audio stream");
     }

@@ -4,3 +4,9 @@ export enum AudioType {
     Int8,
     Float32
 }
+
+export enum AudioEventType {
+    ONAUDIODATA,
+    ERROR,
+    CLOSE
+}

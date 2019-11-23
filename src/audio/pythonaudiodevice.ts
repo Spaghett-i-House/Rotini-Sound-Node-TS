@@ -1,8 +1,11 @@
 import {AudioDevice} from "./audiodevice"
 import { AudioType } from "../types/audio";
 import {spawn, ChildProcess} from "child_process";
-import { SIGTERM } from "constants";
 
+/**
+ * PythonAudioDevice: represents an audioDevice where data is taken from a
+ * python subprocess
+ */
 export class PythonAudioDevice extends AudioDevice{
     private python_audio_filepath: string = "python/audiopipe.py"
     private python_subprocess: ChildProcess = null;
