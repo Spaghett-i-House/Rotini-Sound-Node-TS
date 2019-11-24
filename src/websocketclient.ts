@@ -5,7 +5,7 @@ import {AudioDevice} from "./audio/audiodevice";
 import { AudioType, AudioEventType } from "./types/audio";
 import { AudioAnalyser } from "./audioanalyser"; //, AudioType } from './audioanalyser';
 import * as socketio from 'socket.io';
-
+import {AudioInformationInstance} from './audio/pythonaudioinformation';
 /**
  * SocketIOClient: represents a client connection to the socketIO server
  */
@@ -37,7 +37,7 @@ export class SocketIOClient{
      * client with a refreshed device list
      */
     private startDeviceListInterval(){
-        let audioNames = ["device1", "device2"];
+        let audioNames = AudioInformationInstance.getNames();
         console.log(audioNames);
         this.audioDeviceNames = audioNames;
         this.socket.emit('device_list', audioNames);

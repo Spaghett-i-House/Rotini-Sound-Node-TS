@@ -46,6 +46,6 @@ except KeyboardInterrupt:
     fileo.close()
     exit(2)
 except Exception as e:
-    fileo.write(e)
+    fileo.write(str(e))
     fileo.close()
     exit()

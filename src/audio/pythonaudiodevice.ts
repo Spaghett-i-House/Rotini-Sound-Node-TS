@@ -33,7 +33,7 @@ export class PythonAudioDevice extends AudioDevice{
         if(this.python_subprocess){
             this.python_subprocess.kill("SIGINT");
         }
-        this.python_subprocess = spawn("python", [this.python_audio_filepath, this.device_name, this.blocksize.toString(), this.channels.toString()]);
+        this.python_subprocess = spawn("python3", [this.python_audio_filepath, this.device_name, this.blocksize.toString(), this.channels.toString()]);
         this.python_subprocess.stdout.on('data', (data) => this.onReceiveAudioBuffer(data));
         this.python_subprocess.stderr.on('data', (data) => this.onReceiveAudioError(data));
         this.python_subprocess.on('close', (code) => this.onReceivePythonClosed(code));
