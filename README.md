@@ -19,4 +19,7 @@ sudo apt-get install -y nodejs
 - npm install
 
 ## Running
-- npm start
+- in the base directory run: npm start
+
+## Other notes
+- Rotini SoundWave Node TS requires that python 3 be accessable as python3, if python3 is installed as python on windows create an alias or rename the executable python3
