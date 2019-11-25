@@ -1,0 +1,29 @@
+{
+  "name": "iantestt",
+  "version": "1.0.0",
+  "description": "this is where we test ian things",
+  "main": "app.js",
+  "scripts": {
+    "test": "etst",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "meh"
+  },
+  "keywords": [
+    "yeeet"
+  ],
+  "author": "ian",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "ejs": "^3.0.1",
+    "express": "^4.17.1",
+    "faker": "^4.1.0",
+    "mongodb": "^3.3.4"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.1"
+  }
+}
