@@ -71,24 +71,6 @@ export class AudioAnalyser{
                 newArr.push(lastfreq);
             }
         });
-        /*const difference = origlen - vcount;
-        const mult = vcount/origlen;
-        const step = Math.ceil(1/mult);
-        //console.log(step);
-        let newnewarr = [];
-        let i=0
-        newArr.forEach((element) => {
-            for(let i = 0; i<step; i++){
-                newnewarr.push(element);
-            }
-        });
-        /*for(let i = 0; i< newArr.length; i++){
-            for(let u = i; u<step; u++){
-                newArr.splice(i, 0, newArr[i]);
-                i+=1;
-            }
-        }*/
-        //console.log(origlen, newArr.length);
         return newArr;
     }
 }
