@@ -53,8 +53,21 @@ export abstract class AudioDevice{
      * @param audioBytes a float32 array of audio bytes
      */
     protected onAudio(audioBytes: Float32Array){
-        this.events.get(AudioEventType.ONAUDIODATA).fire(audioBytes);
-        this.mostRecentAudioChunk = audioBytes;
+        if(audioBytes.length > this.blocksize){
+            let length_mult = audioBytes.length/this.blocksize;
+            let step = audioBytes.length/length_mult;
+            for(let i=0; i<length_mult; i++){
+                let new_arr = audioBytes.slice(i*step, (i+1)*step);
+                console.log(new_arr.length);
+                this.events.get(AudioEventType.ONAUDIODATA).fire(new_arr);
+                this.mostRecentAudioChunk = new_arr;
+            }
+        }
+        else{
+            this.events.get(AudioEventType.ONAUDIODATA).fire(audioBytes);
+            this.mostRecentAudioChunk = audioBytes;
+        }
+ 
     }
 
     /**

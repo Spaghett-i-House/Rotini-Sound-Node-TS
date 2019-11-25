@@ -20,6 +20,7 @@ export class AudioAnalyser{
         let both = frequencies.map((f, ix) => {
             return [Math.floor(f), magnatudes[ix]]
         });
+        //console.log(both);
 
         return both;
     }
@@ -49,6 +50,46 @@ export class AudioAnalyser{
         }
 
         return finalFloatArray;
+    }
+
+    public static filterFFT(fft: Array<[number, number]>, lowFreq: number, highFreq: number){
+        let newArr = [];
+        const origlen = fft.length;
+        let vcount = 0;
+        let lowcounter = 0;
+        let highcounter = 0;
+        let lastfreq = [0, 0]
+        fft.forEach((frequency) => {
+            if(frequency[0] > lowFreq && frequency[0] < highFreq){
+                //newMap[frequency] = fft[frequency];
+                //console.log(frequency[0], frequency[1])
+                vcount += 1;
+                newArr.push([frequency[0], frequency[1]]);
+                lastfreq = [frequency[0], frequency[1]]
+            }
+            else{
+                newArr.push(lastfreq);
+            }
+        });
+        /*const difference = origlen - vcount;
+        const mult = vcount/origlen;
+        const step = Math.ceil(1/mult);
+        //console.log(step);
+        let newnewarr = [];
+        let i=0
+        newArr.forEach((element) => {
+            for(let i = 0; i<step; i++){
+                newnewarr.push(element);
+            }
+        });
+        /*for(let i = 0; i< newArr.length; i++){
+            for(let u = i; u<step; u++){
+                newArr.splice(i, 0, newArr[i]);
+                i+=1;
+            }
+        }*/
+        //console.log(origlen, newArr.length);
+        return newArr;
     }
 }
 

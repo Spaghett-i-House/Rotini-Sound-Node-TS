@@ -16,6 +16,7 @@ export class SocketIOClient{
     private audioDeviceStream: AudioDevice;
     private deviceListSendInterval: NodeJS.Timeout;
     private audioDeviceNames: string[]
+    private audioFilter: [number, number];
 
     /**
      * constructor
@@ -52,6 +53,14 @@ export class SocketIOClient{
      */
     private addEventListeners(){
         this.socket.on('start_stream', (deviceName: string) => this.onStart(deviceName));
+        this.socket.on('add_filter', (highval, lowval) => {
+            console.log("filter added");
+            this.audioFilter = [highval, lowval]
+        });
+        this.socket.on('remove_filter', () => {
+            this.audioFilter = null
+            console.log("filter removed");
+        });
         this.socket.on('stop_stream', () => this.onCloseStream());
         this.socket.on('close', () => this.onClose());
         this.socket.on('disconnect', () => this.onClose())
@@ -120,6 +129,11 @@ export class SocketIOClient{
         // take fft
         try{
             let frequencyData = AudioAnalyser.getFrequencies(audioData, 44100);
+            if(this.audioFilter != null){
+                const high = this.audioFilter[0];
+                const low = this.audioFilter[1];
+                frequencyData = AudioAnalyser.filterFFT(frequencyData, high, low);
+            }
             this.socket.emit('audio', frequencyData);
         } catch(err){
             console.log("[WARNING] Could not perform FFT Data length not sufficient");
