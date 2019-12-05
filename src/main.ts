@@ -1,4 +1,4 @@
 import {WebsocketServer} from './websocketserver';
-
-const websocketserver = new WebsocketServer(6879);
-console.log("listening on 6879");
+const port = Number(process.argv[2]);
+const websocketserver = new WebsocketServer(port);
+console.log(`listening on ${port}`);
