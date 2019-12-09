@@ -2,6 +2,8 @@
 Sound Node in typescript to allow easy direct use of websockets
 
 ## Installation
+If you are looking to install this software for usage and not development head to https://github.com/Spaghett-i-House/Rotini-Sound-Node-TS/tree/release/0.1 for instructions
+
 
 ### Installing python 3
 - sudo apt install python3
